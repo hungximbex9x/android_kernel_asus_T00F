@@ -874,14 +874,13 @@ asmlinkage long compat_sys_old_readdir(unsigned int fd,
 {
 	int error;
 	struct fd f = fdget(fd);
-	struct compat_readdir_callback buf;
+	struct compat_readdir_callback buf = {
+		.ctx.actor = compat_fillonedir,
+		.dirent = dirent
+	};
 
 	if (!f.file)
 		return -EBADF;
-
-	buf.result = 0;
-	buf.dirent = dirent;
-	buf.ctx.actor = compat_fillonedir;
 
 	error = iterate_dir(f.file, &buf.ctx);
 	if (buf.result)
@@ -954,7 +953,11 @@ asmlinkage long compat_sys_getdents(unsigned int fd,
 {
 	struct fd f;
 	struct compat_linux_dirent __user * lastdirent;
-	struct compat_getdents_callback buf;
+	struct compat_getdents_callback buf = {
+		.ctx.actor = compat_filldir,
+		.current_dir = dirent,
+		.count = count
+	};
 	int error;
 
 	if (!access_ok(VERIFY_WRITE, dirent, count))
@@ -964,18 +967,12 @@ asmlinkage long compat_sys_getdents(unsigned int fd,
 	if (!f.file)
 		return -EBADF;
 
-	buf.current_dir = dirent;
-	buf.previous = NULL;
-	buf.count = count;
-	buf.error = 0;
-	buf.ctx.actor = compat_filldir;
-
 	error = iterate_dir(f.file, &buf.ctx);
 	if (error >= 0)
 		error = buf.error;
 	lastdirent = buf.previous;
 	if (lastdirent) {
-		if (put_user(f.file->f_pos, &lastdirent->d_off))
+		if (put_user(buf.ctx.pos, &lastdirent->d_off))
 			error = -EFAULT;
 		else
 			error = count - buf.count;
@@ -1041,7 +1038,11 @@ asmlinkage long compat_sys_getdents64(unsigned int fd,
 {
 	struct fd f;
 	struct linux_dirent64 __user * lastdirent;
-	struct compat_getdents_callback64 buf;
+	struct compat_getdents_callback64 buf = {
+		.ctx.actor = compat_filldir64,
+		.current_dir = dirent,
+		.count = count
+	};
 	int error;
 
 	if (!access_ok(VERIFY_WRITE, dirent, count))
@@ -1051,18 +1052,12 @@ asmlinkage long compat_sys_getdents64(unsigned int fd,
 	if (!f.file)
 		return -EBADF;
 
-	buf.current_dir = dirent;
-	buf.previous = NULL;
-	buf.count = count;
-	buf.error = 0;
-	buf.ctx.actor = compat_filldir64;
-
 	error = iterate_dir(f.file, &buf.ctx);
 	if (error >= 0)
 		error = buf.error;
 	lastdirent = buf.previous;
 	if (lastdirent) {
-		typeof(lastdirent->d_off) d_off = f.file->f_pos;
+		typeof(lastdirent->d_off) d_off = buf.ctx.pos;
 		if (__put_user_unaligned(d_off, &lastdirent->d_off))
 			error = -EFAULT;
 		else
