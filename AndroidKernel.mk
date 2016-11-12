@@ -4,41 +4,10 @@
 # dependency due to its bad handling of echo \1
 MAKE += SHELL=/bin/bash
 
-# This rule is useful for creating a kernel that will be
-# shared with a tree that does not have kernel source.
-make_kernel_tarball: get_kernel_from_source bootimage
-	@echo Building kernel tarball: $(TARGET_KERNEL_TARBALL)
-	@rm -rf $(PRODUCT_OUT)/kerneltarball
-	@mkdir -p $(PRODUCT_OUT)/kerneltarball/root/lib/modules
-	@cp $(PRODUCT_OUT)/root/lib/modules/* $(PRODUCT_OUT)/kerneltarball/root/lib/modules
-	@cp $(PRODUCT_OUT)/bzImage $(PRODUCT_OUT)/kerneltarball/
-	tar cvzf $(TARGET_KERNEL_TARBALL) -C $(PRODUCT_OUT)/kerneltarball bzImage root/lib/modules
-
-KERNEL_SOC_medfield := mfld
-KERNEL_SOC_clovertrail := ctp
-KERNEL_SOC_merrifield := mrfl
-KERNEL_SOC_baytrail := byt
-KERNEL_SOC_cherrytrail := cht
-KERNEL_SOC_moorefield := moor
-KERNEL_SOC_morganfield := morg
-KERNEL_SOC_carboncanyon := crc
-KERNEL_SOC_braswell := bsw
-
-KERNEL_SOC := $(KERNEL_SOC_$(TARGET_BOARD_PLATFORM))
-
-ifeq ($(KERNEL_SOC),)
-$(error cannot build kernel, TARGET_BOARD_PLATFORM is not defined)
-endif
-
-# All targets (userspace 32b and userspace 64b) will use binder version 8.
+KERNEL_SOC := ctp
 TARGET_USES_64_BIT_BINDER := true
-
-ifeq ($(BOARD_USE_64BIT_KERNEL),true)
-KERNEL_ARCH := x86_64
-else
 KERNEL_ARCH := i386
-endif
-KERNEL_EXTRA_FLAGS := ANDROID_TOOLCHAIN_FLAGS=-mno-android
+KERNEL_EXTRA_FLAGS := ANDROID_TOOLCHAIN_FLAGS=-mno-android -w
 KERNEL_CROSS_COMP := $(notdir $(TARGET_TOOLS_PREFIX))
 
 KERNEL_CCACHE :=$(firstword $(TARGET_CC))
@@ -64,7 +33,6 @@ KERNEL_BLD_FLAGS := \
     INSTALL_MOD_PATH=../$(KERNEL_MODINSTALL) \
     INSTALL_MOD_STRIP=1 \
     DEPMOD=_fake_does_not_exist_ \
-    LOCALVERSION=-$(KERNEL_ARCH)_$(KERNEL_SOC) \
     $(KERNEL_EXTRA_FLAGS)
 
 KERNEL_BLD_FLAGS_KDUMP := $(KERNEL_BLD_FLAGS) \
@@ -82,7 +50,7 @@ KERNEL_DEFCONFIG := $(KERNEL_SRC_DIR)/arch/x86/configs/$(KERNEL_ARCH)_$(KERNEL_S
 KERNEL_DIFFCONFIG ?= $(TARGET_DEVICE_DIR)/$(TARGET_DEVICE)_diffconfig
 KERNEL_VERSION_FILE := $(KERNEL_OUT_DIR)/include/config/kernel.release
 KERNEL_VERSION_FILE_KDUMP := $(KERNEL_OUT_DIR_KDUMP)/include/config/kernel.release
-KERNEL_BZIMAGE := $(PRODUCT_OUT)/kernel
+KERNEL_BZIMAGE := $(PRODUCT_OUT)/BZIMAGE
 
 $(KERNEL_CONFIG): $(KERNEL_DEFCONFIG) $(wildcard $(KERNEL_DIFFCONFIG))
 	@echo Regenerating kernel config $(KERNEL_OUT_DIR)

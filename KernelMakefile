@@ -27,4 +27,4 @@ $(info KERNEL_DIFFCONFIG ${KERNEL_DIFFCONFIG} )
 
 include kernel/asus/T00F/AndroidKernel.mk
 
-build_kernel: $(PRODUCT_OUT)/kernel
+build_kernel: $(PRODUCT_OUT)/BZIMAGE
