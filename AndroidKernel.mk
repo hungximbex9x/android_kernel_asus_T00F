@@ -46,18 +46,14 @@ KERNEL_BLD_ENV := CROSS_COMPILE=$(KERNEL_CROSS_COMP) \
     CCACHE_SLOPPINESS=$(KERNEL_CCSLOP)
 KERNEL_FAKE_DEPMOD := $(KERNEL_OUT_DIR)/fakedepmod/lib/modules
 
-KERNEL_DEFCONFIG := $(KERNEL_SRC_DIR)/arch/x86/configs/$(KERNEL_ARCH)_$(KERNEL_SOC)_defconfig
-KERNEL_DIFFCONFIG ?= $(TARGET_DEVICE_DIR)/$(TARGET_DEVICE)_diffconfig
 KERNEL_VERSION_FILE := $(KERNEL_OUT_DIR)/include/config/kernel.release
 KERNEL_VERSION_FILE_KDUMP := $(KERNEL_OUT_DIR_KDUMP)/include/config/kernel.release
 KERNEL_BZIMAGE := $(PRODUCT_OUT)/BZIMAGE
 
-$(KERNEL_CONFIG): $(KERNEL_DEFCONFIG) $(wildcard $(KERNEL_DIFFCONFIG))
+$(KERNEL_CONFIG): $(KERNEL_DEFCONFIG)
 	@echo Regenerating kernel config $(KERNEL_OUT_DIR)
 	@mkdir -p $(KERNEL_OUT_DIR)
-	@cat $^ > $@
-	@! $(KERNEL_BLD_ENV) $(MAKE) -C $(KERNEL_SRC_DIR) $(KERNEL_BLD_FLAGS) listnewconfig | grep -q CONFIG_ ||  \
-		(echo "There are errors in defconfig $^, please run cd $(KERNEL_SRC_DIR) && ./scripts/updatedefconfigs.sh" ; exit 1)
+	cp $(KERNEL_DEFCONFIG) $(KERNEL_OUT_DIR)/.config
 
 $(KERNEL_CONFIG_KDUMP): $(KERNEL_DEFCONFIG) $(wildcard $(COMMON_PATH)/kdump_defconfig)
 	@echo Regenerating kdump kernel config $(KERNEL_OUT_DIR_KDUMP)

@@ -1,0 +1,42 @@
+# Travis CI Configuration File
+# Author: Douglas Gadêlha <douglas@gadeco.com.br>
+#
+# The MIT License (MIT)
+#
+# Copyright (c) 2016 Douglas Gadêlha. All Rights Reserved.
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+
+language: cpp
+
+before_install:
+- sudo apt-get update -qq
+- sudo apt-get install -qqy build-essential zlib1g-dev gcc-multilib g++-multilib libc6-dev-i386 lib32ncurses5-dev x11proto-core-dev libx11-dev lib32z-dev ccache libgl1-mesa-dev libxml2-utils xsltproc unzip ncftp curl zip  > /dev/null 2>&1
+- sudo wget https://storage.googleapis.com/git-repo-downloads/repo -O/usr/bin/repo
+- sudo chmod +x /usr/bin/repo
+
+before_script:
+- bash .build/01-env.sh > /dev/null 2>&1
+
+script:
+- bash .build/02-build.sh
+
+after_success:
+- bash .build/03-zip.sh
+- bash .build/04-deploy.sh

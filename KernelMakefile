@@ -2,6 +2,7 @@ TARGET_BOARD_PLATFORM := clovertrail
 TARGET_DEVICE := hd
 PRODUCT_OUT := out/target/product/T00F
 KERNEL_DIFFCONFIG := kernel/asus/T00F/defconfig
+KERNEL_DEFCONFIG := kernel/asus/T00F/defconfig
 
 TARGET_ARCH := x86
 TARGET_ARCH_VARIANT := x86-atom

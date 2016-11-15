@@ -326,9 +326,6 @@ load:
 				if (sym->type == S_UNKNOWN)
 					sym->type = S_BOOLEAN;
 			}
-			if (sym->flags & def_flags) {
-				conf_warning("override: reassigning to symbol %s", sym->name);
-			}
 			switch (sym->type) {
 			case S_BOOLEAN:
 			case S_TRISTATE:
@@ -359,9 +356,6 @@ load:
 				sym = sym_lookup(line + strlen(CONFIG_), 0);
 				if (sym->type == S_UNKNOWN)
 					sym->type = S_OTHER;
-			}
-			if (sym->flags & def_flags) {
-				conf_warning("override: reassigning to symbol %s", sym->name);
 			}
 			if (conf_set_sym_val(sym, def, def_flags, p))
 				continue;
