@@ -32,7 +32,7 @@ git config --global color.ui "true"
 
 mkdir build
 cd build
-repo init -u git://github.com/zf5/android.git -b kernel-travis
+repo init -u git://github.com/intel-ctp/android.git -b zf5/kernel-travis
 repo sync -c -j12
 rm -Rf bionic/tests
 
